@@ -1,0 +1,25 @@
+{
+  "name": "cartelle-protette",
+  "version": "0.1.0",
+  "description": "Cartelle che Claude può leggere ma non modificare: niente modifiche ai file, niente comandi che ci scrivono, né dal terminale né dai connettori.",
+  "author": { "name": "Damiano Ravanelli" },
+  "license": "MIT",
+  "homepage": "https://github.com/Iggy56/cartelle-protette",
+  "repository": "https://github.com/Iggy56/cartelle-protette",
+  "keywords": ["sicurezza", "cartelle", "sola lettura", "guardia"],
+  "userConfig": {
+    "cartelle": {
+      "type": "string",
+      "multiple": true,
+      "title": "Cartelle protette",
+      "description": "Le cartelle dove Claude può leggere ma non scrivere, una per riga. Per esempio ~/Documenti/Contratti.",
+      "default": []
+    },
+    "lavorare_dentro": {
+      "type": "boolean",
+      "title": "Lavorare dentro la cartella",
+      "description": "Se apri Claude Code dentro una cartella protetta, lì la guardia si fa da parte e puoi lavorarci.",
+      "default": true
+    }
+  }
+}

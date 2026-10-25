@@ -1,0 +1,6 @@
+{
+  "name": "cartelle-protette",
+  "description": "Cartelle che Claude può leggere ma non modificare.",
+  "owner": { "name": "Damiano Ravanelli" },
+  "plugins": [{ "name": "cartelle-protette", "source": "./" }]
+}
