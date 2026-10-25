@@ -1,6 +1,6 @@
 {
   "name": "cartelle-protette",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Cartelle che Claude può leggere ma non modificare: niente modifiche ai file, niente comandi che ci scrivono, né dal terminale né dai connettori.",
   "author": { "name": "Damiano Ravanelli" },
   "license": "MIT",

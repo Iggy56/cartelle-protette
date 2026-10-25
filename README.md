@@ -14,7 +14,7 @@ Se apri Claude Code dentro una cartella protetta, perché ci vuoi lavorare appos
 
 Claude Code 2.1.292 o successivo, nel terminale, in VS Code o nella scheda Code dell'app desktop. Per sapere che versione hai scrivi `claude --version` nel terminale, per aggiornarla `claude update`. Con una versione più vecchia la mod non parte, e non te lo dice.
 
-È provata su Mac. Su Linux dovrebbe comportarsi allo stesso modo, su Windows non è stata provata.
+È provata su Mac. Su Linux dovrebbe comportarsi allo stesso modo. Su Windows non usarla: lì Claude Code lancia i comandi con PowerShell, che la guardia non sorveglia, e scrive i percorsi in un'altra forma, quindi non protegge niente. Se la installi su Windows, all'apertura della sessione te lo dice.
 
 ## Come si installa
 
@@ -46,11 +46,11 @@ All'apertura di ogni sessione compare una riga come «attiva su 2 cartelle: ~/Do
 
 ## Cambiare le cartelle
 
-Apri la gestione delle mod (`/plugins` in VS Code, `/plugin` nel terminale), scegli `cartelle-protette` e poi «Configure options». Claude non può farlo al posto tuo: la guardia ferma anche i suoi tentativi di cambiarle le impostazioni, disattivarla o disinstallarla.
+Apri la gestione delle mod (`/plugins` in VS Code, `/plugin` nel terminale), scegli `cartelle-protette` e poi «Configure options». Claude non può farlo al posto tuo: la guardia ferma anche i suoi tentativi di cambiarle le impostazioni, disattivarla o disinstallarla, dagli strumenti dei file e dal terminale. Vale per le impostazioni di Claude Code, anche quelle dei singoli progetti, e per i file della mod installata.
 
 ## Quando ferma una cosa innocua
 
-Ogni tanto succede. Un messaggio di commit che contiene il percorso di una cartella protetta viene fermato, e Claude lo riscrive senza. Un comando che pulisce in un colpo solo la cartella che contiene quella protetta viene fermato, e Claude deve restringerlo. In tutti e due i casi la riga dice cosa è successo.
+Ogni tanto succede. Un messaggio di commit che contiene il percorso di una cartella protetta viene fermato, e Claude lo riscrive senza. Un comando che pulisce in un colpo solo la cartella che contiene quella protetta viene fermato, e Claude deve restringerlo. Un comando o un programma che nomina i file delle impostazioni di Claude Code o la cartella delle mod viene fermato anche se voleva solo leggerli, a meno che sia uno dei comandi che leggono. In tutti i casi la riga dice cosa è successo.
 
 ## Cosa non copre
 
@@ -59,6 +59,8 @@ La mod vive dentro Claude Code e ferma quello che fa Claude Code, compresi i suo
 - le altre app: se apri un file in Word e lo salvi, o se Dropbox sincronizza, la mod non c'entra;
 - Claude usato da altre app, come la chat di Claude Desktop con l'accesso ai file o Cowork;
 - un programma che scrive nella cartella per conto suo, senza che il comando la nomini;
+- un comando costruito apposta per nascondere il percorso, per esempio con il nome della cartella spezzato in una variabile: la guardia ferma gli errori, non i travestimenti;
+- Windows;
 - le versioni di Claude Code precedenti alla 2.1.292.
 
 Riduce il rischio, non lo azzera. Una cartella che nessuno deve mai cambiare, come un archivio, puoi bloccarla anche dal Mac: nel Finder, tasto destro sulla cartella, «Ottieni informazioni», e in «Condivisione e permessi» metti «Sola lettura», poi «Applica agli elementi inclusi» dal menu con l'ingranaggio. Così si ferma qualsiasi app, tu compreso, e la mod impedisce a Claude di togliere il blocco.

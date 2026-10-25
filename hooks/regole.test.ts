@@ -77,6 +77,10 @@ test('la lettura e il resto passano', async () => {
     'rm nota.md',
     'git add .claude/settings.json',
     'cat ~/.claude/settings.json',
+    'rm -rf ~/Progetti/vecchio',
+    'ls ~/.claude/plugins',
+    'cat ~/.claude/plugins/installed_plugins.json',
+    'claude plugin install altra@catalogo',
   ]
   for (const comando of passano) expect([comando, await come(comando)]).toEqual([comando, 'passa'])
 })
@@ -118,6 +122,24 @@ test('le impostazioni di Claude Code non si scrivono dal terminale', async () =>
   expect(await come("echo '{}' > ~/.claude/settings.json")).toBe('impostazioni')
   expect(await come('sed -i "" s/true/false/ .claude/settings.local.json')).toBe('impostazioni')
   expect(await come("echo '{}' > ~/.claude/settings.json", { cartelle: [] })).toBe('impostazioni')
+  expect(await come(`python3 -c "open('${CASA}/Progetti/.claude/settings.local.json','w')"`)).toBe('impostazioni')
+  const leggi = async (p: string) => (p === `${CASA}/Progetti/spegni.py` ? "open('.claude/settings.local.json', 'w')" : undefined)
+  expect(await come('python3 spegni.py', { leggi })).toBe('impostazioni')
+})
+
+test('i file della guardia installata non si toccano dal terminale', async () => {
+  const mod = '~/.claude/plugins/cache/cartelle-protette/cartelle-protette/0.1.3'
+  const fermati = [
+    `rm -rf ${mod}`,
+    'rm -rf ~/.claude/plugins/cache/cartelle-protette',
+    `sed -i '' 's/deny/nulla/' ${mod}/hooks/register.ts`,
+    "echo '{}' > ~/.claude/plugins/installed_plugins.json",
+    'rm -rf ~/.claude/plugins/cache',
+    'git -C ~/.claude/plugins/marketplaces/cartelle-protette checkout HEAD~1',
+    'cd ~/.claude && rm -rf plugins',
+    'rm -rf ~/.claude',
+  ]
+  for (const comando of fermati) expect([comando, await come(comando, { cartelle: [] })]).toEqual([comando, 'impostazioni'])
 })
 
 test('i comandi che spengono la guardia si riconoscono', () => {

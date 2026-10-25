@@ -11,6 +11,7 @@ import {
   fileDellaGuardia,
   nominataDa,
   normalizza,
+  spegneDalleImpostazioni,
   spegneLaGuardia,
   testiDi,
 } from './regole'
@@ -107,15 +108,16 @@ async function giudicaComando($: EngineInterface, scelte: Scelte, comando: strin
   return tocco.come === 'impostazioni' ? difendi($) : ferma($, tocco.come, tocco.cartella)
 }
 
-// `testo` è quello che la modifica toglie e mette; per una riscrittura intera conta il file com'è ora.
-async function giudicaFile($: EngineInterface, scelte: Scelte, percorso: string, testo?: string) {
+// `testo` è quello che la modifica toglie e mette; per una riscrittura intera conta il file com'è ora
+// più `nuovo`, quello che diventa.
+async function giudicaFile($: EngineInterface, scelte: Scelte, percorso: string, testo?: string, nuovo = '') {
   const { casa, cwd, attive } = await stato($, scelte)
   const p = await reale($, assoluto(percorso, cwd, casa))
   const proprio = fileDellaGuardia(p, casa)
   if (proprio === 'installazione') return difendi($)
   if (proprio === 'impostazioni') {
-    const toccato = testo ?? (await $.fs.read(p).catch(() => ''))
-    if (toccato.includes(NOME)) return difendi($)
+    const toccato = testo ?? `${await $.fs.read(p).catch(() => '')}\n${nuovo}`
+    if (spegneDalleImpostazioni(toccato)) return difendi($)
   }
   const cartella = attive.find(c => c.percorsi.some(r => dentro(p, r)))
   return cartella ? ferma($, 'file', cartella) : undefined
@@ -128,7 +130,11 @@ async function giudicaConnettore($: EngineInterface, scelte: Scelte, chiamata: u
   return cartella ? ferma($, 'connettore', cartella) : undefined
 }
 
+// Su Windows il terminale è PowerShell e i percorsi hanno un'altra forma: la guardia non riconosce niente.
+const WINDOWS = `su Windows ${NOME} non protegge le cartelle: non contare su di lei.`
+
 async function apertura($: EngineInterface, scelte: Scelte) {
+  if ((await $.env.get('OS').catch(() => undefined)) === 'Windows_NT') return $.ui.log(WINDOWS)
   const { attive, libere } = await stato($, scelte).catch(() => ({ attive: [], libere: [] }))
   $.ui.log(rigaDiApertura(attive, libere))
 }
@@ -175,7 +181,7 @@ export const register: Register = (on, options) => {
     (await giudicaFile($, scelte, e.file_path, `${e.old_string}\n${e.new_string}`)) ?? next(e),
   ).catch(($, e, next) => (next.called || !sospetto(scelte, e.file_path) ? next(e) : { deny: GUASTA }))
 
-  on('tool.call', { tool: 'Write' }, async ($, e, next) => (await giudicaFile($, scelte, e.file_path)) ?? next(e)).catch(
+  on('tool.call', { tool: 'Write' }, async ($, e, next) => (await giudicaFile($, scelte, e.file_path, undefined, e.content)) ?? next(e)).catch(
     ($, e, next) => (next.called || !sospetto(scelte, e.file_path) ? next(e) : { deny: GUASTA }),
   )
 

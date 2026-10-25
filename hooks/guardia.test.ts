@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, mock, test } from 'claude-code/testing'
 
 // La mod intera, con il motore finto sotto: nessun comando gira e nessun file si tocca.
 // L'hook su tool.call sta al posto del motore e conta solo cosa la guardia lascia passare.
@@ -72,6 +72,31 @@ test('le impostazioni della guardia le cambia solo la persona', { options: OPZIO
   await $.tool.call({ tool: 'Write', file_path: `${CASA}/.claude/plugins/cache/cartelle-protette/hooks/register.ts`, content: '' })
   await modifica('"theme": "dark"', '"theme": "light"')
   expect(passati).toEqual([impostazioni])
+})
+
+test('le impostazioni di un progetto e gli elenchi delle mod non la spengono', { options: OPZIONI }, async ($, on) => {
+  const progetto = `${PROGETTI}/sito/.claude/settings.json`
+  const elenco = `${CASA}/.claude/plugins/installed_plugins.json`
+  const { passati } = prepara(on, { file: { [progetto]: '{ "permissions": {} }', [elenco]: '{ "plugins": {} }' } })
+  const spenta = '{ "enabledPlugins": { "cartelle-protette@cartelle-protette": false } }'
+  await $.tool.call({ tool: 'Write', file_path: `${PROGETTI}/.claude/settings.local.json`, content: spenta })
+  await $.tool.call({ tool: 'Write', file_path: progetto, content: spenta })
+  await $.tool.call({ tool: 'Edit', file_path: progetto, old_string: '"permissions": {}', new_string: '"disableAllHooks": true' })
+  await $.tool.call({ tool: 'Edit', file_path: elenco, old_string: '"plugins": {}', new_string: '' })
+  await $.tool.call({ tool: 'Write', file_path: `${PROGETTI}/.claude/settings.local.json`, content: '{ "permissions": {} }' })
+  expect(passati).toEqual([`${PROGETTI}/.claude/settings.local.json`])
+})
+
+test('su Windows all\'apertura dice che non protegge', { options: OPZIONI }, async ($, on) => {
+  const righe: string[] = []
+  mock.env(on, { HOME: CASA, OS: 'Windows_NT' })
+  on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
+  on('ui.log', (_: unknown, e: any) => {
+    righe.push(e.text)
+    return { value: undefined }
+  })
+  await $.session.start({ cwd: PROGETTI, surface: 'terminal', isInteractive: true })
+  expect(righe).toEqual(['su Windows cartelle-protette non protegge le cartelle: non contare su di lei.'])
 })
 
 test('un connettore che nomina una cartella protetta si ferma', { options: OPZIONI }, async ($, on) => {

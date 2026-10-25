@@ -38,7 +38,9 @@ const SU_TUTTO = new Set(['rm', 'rmdir', 'mv', 'trash', 'rsync', 'shred', 'srm',
 // I programmi che eseguono un file: la guardia legge il file prima che parta.
 const INTERPRETI = new Set(['python', 'python3', 'node', 'bash', 'sh', 'zsh', 'ruby', 'perl', 'php', 'deno', 'bun', 'tsx'])
 const PROGRAMMA = /\.(?:sh|bash|zsh|py|js|mjs|cjs|ts|rb|pl|php)$/i
-const IMPOSTAZIONI = /\/\.claude\/settings(?:\.local)?\.json$/
+const IMPOSTAZIONI = /\/\.claude\/settings(?:\.local)?\.json$/i
+// Le impostazioni e la cartella delle mod come possono comparire nel testo di un comando o di un programma.
+const NOMINA_GUARDIA = /\.claude\/(?:settings(?:\.local)?\.json|plugins(?![a-z0-9_.-]))/i
 
 /** Toglie ".", ".." e le barre doppie da un percorso assoluto. */
 export function normalizza(percorso: string): string {
@@ -227,11 +229,16 @@ export async function esamina(comando: string, amb: Ambiente): Promise<Tocco | u
     const versoFile = (await Promise.all(pezzo.redirezioni.map(lungo))).filter(p => p !== '/dev/null')
     const percorsi = await Promise.all(percorsiDi(pezzo.parole).map(lungo))
     const legge = !sottocomandi && LEGGE.has(primo) && !(primo === 'find' && resto.some(w => FIND_SCRIVE.test(w)))
+    const testo = [...pezzo.parole, ...pezzo.redirezioni].join(' ').toLowerCase()
 
-    // Le impostazioni di Claude Code scritte dal terminale: la guardia si spegnerebbe lì.
-    // git no: aggiungerle a un commit non le cambia.
-    const impostazioni = (p: string) => IMPOSTAZIONI.test(p)
-    if (versoFile.some(impostazioni) || (!legge && primo !== 'git' && percorsi.some(impostazioni))) {
+    // Le impostazioni di Claude Code e i file della guardia installata, scritti dal terminale:
+    // la guardia si spegnerebbe lì. git sulle impostazioni no: aggiungerle a un commit non le cambia.
+    const guardia = (p: string) => fileDellaGuardia(p, amb.casa)
+    const tocca = (p: string) => guardia(p) === 'installazione' || (guardia(p) === 'impostazioni' && primo !== 'git')
+    if (
+      versoFile.some(p => guardia(p) !== undefined) ||
+      (!legge && (percorsi.some(tocca) || (primo !== 'git' && NOMINA_GUARDIA.test(testo))))
+    ) {
       return { come: 'impostazioni' }
     }
 
@@ -239,7 +246,6 @@ export async function esamina(comando: string, amb: Ambiente): Promise<Tocco | u
     const scrittaDentro = versoFile.map(sotto).find(c => c !== undefined)
     if (scrittaDentro) return { come: 'scrive', cartella: scrittaDentro }
 
-    const testo = [...pezzo.parole, ...pezzo.redirezioni].join(' ').toLowerCase()
     const toccata =
       amb.cartelle.find(c => c.testi.some(t => nomina(testo, t))) ??
       sotto(dove) ??
@@ -249,6 +255,7 @@ export async function esamina(comando: string, amb: Ambiente): Promise<Tocco | u
     for (const p of await Promise.all(suTutto(pezzo.parole).map(lungo))) {
       const contenuta = amb.cartelle.find(c => c.percorsi.some(r => dentro(r, p)))
       if (contenuta) return { come: 'contiene', cartella: contenuta }
+      if (dentro(modDi(amb.casa), p)) return { come: 'impostazioni' }
     }
 
     const programma = programmaDi(pezzo.parole)
@@ -256,6 +263,7 @@ export async function esamina(comando: string, amb: Ambiente): Promise<Tocco | u
       const codice = (await amb.leggi(await lungo(programma)))?.toLowerCase()
       const nominata = codice && amb.cartelle.find(c => c.testi.some(t => nomina(codice, t)))
       if (nominata) return { come: 'programma', cartella: nominata }
+      if (codice && NOMINA_GUARDIA.test(codice)) return { come: 'impostazioni' }
     }
 
     if (primo === 'cd' || primo === 'pushd') dove = assoluto(resto[0] ?? '~', dove, amb.casa)
@@ -296,9 +304,21 @@ export function spegneLaGuardia(comando: string): boolean {
   return t.includes(NOME) && (spegne.test(t) || riconfigura.test(t))
 }
 
-/** Se il file è un'impostazione di Claude Code o un file della guardia installata. */
+/** La cartella dove Claude Code tiene le mod installate. */
+const modDi = (casa: string) => normalizza(`${casa}/.claude/plugins`)
+
+/** Se il file è un'impostazione di Claude Code o un file della guardia installata: il suo codice, e
+ * in cima alla cartella delle mod gli elenchi di quelle installate e dei cataloghi. */
 export function fileDellaGuardia(percorso: string, casa: string): 'impostazioni' | 'installazione' | undefined {
   if (IMPOSTAZIONI.test(percorso)) return 'impostazioni'
-  if (dentro(percorso, `${casa}/.claude/plugins`) && percorso.toLowerCase().includes(NOME)) return 'installazione'
-  return undefined
+  const mod = modDi(casa)
+  if (!dentro(percorso, mod)) return undefined
+  const inCima = !percorso.slice(mod.length + 1).includes('/')
+  return inCima || percorso.toLowerCase().includes(NOME) ? 'installazione' : undefined
+}
+
+/** Se il testo di un'impostazione tocca la guardia: la nomina, o spegne tutte le mod insieme. */
+export function spegneDalleImpostazioni(testo: string): boolean {
+  const t = testo.toLowerCase()
+  return t.includes(NOME) || t.includes('disableallhooks')
 }
