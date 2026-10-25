@@ -120,6 +120,9 @@ test('i comandi che spengono la guardia si riconoscono', () => {
   expect(spegneLaGuardia('claude plugin configure cartelle-protette@cartelle-protette --values-stdin')).toBe(true)
   expect(spegneLaGuardia('claude plugin list')).toBe(false)
   expect(spegneLaGuardia('claude plugin validate ~/mods/cartelle-protette')).toBe(false)
+  // Senza --values-stdin configure mostra soltanto le impostazioni.
+  expect(spegneLaGuardia('claude plugin configure cartelle-protette@cartelle-protette')).toBe(false)
+  expect(spegneLaGuardia('claude plugin configure cartelle-protette@cartelle-protette --json')).toBe(false)
 })
 
 test('un connettore che nomina la cartella si riconosce, a qualsiasi profondità', () => {

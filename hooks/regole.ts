@@ -285,10 +285,14 @@ export function nominataDa(valore: unknown, amb: Pick<Ambiente, 'cwd' | 'casa' |
   return undefined
 }
 
-/** Se un comando prova a disinstallare, disattivare o riconfigurare la guardia. */
+/** Se un comando prova a disinstallare, disattivare o riconfigurare la guardia (configure senza
+ * --values-stdin mostra soltanto le impostazioni, e passa). */
 export function spegneLaGuardia(comando: string): boolean {
   const t = comando.toLowerCase()
-  return t.includes(NOME) && /\bclaude\b[^\n;&|]*\bplugins?\b[^\n;&|]*\b(?:uninstall|remove|disable|configure)\b/.test(t)
+  const claude = /\bclaude\b[^\n;&|]*\bplugins?\b[^\n;&|]*/
+  const spegne = new RegExp(`${claude.source}\\b(?:uninstall|remove|disable)\\b`)
+  const riconfigura = new RegExp(`${claude.source}\\bconfigure\\b[^\\n;&|]*--values-stdin`)
+  return t.includes(NOME) && (spegne.test(t) || riconfigura.test(t))
 }
 
 /** Se il file è un'impostazione di Claude Code o un file della guardia installata. */

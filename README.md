@@ -12,7 +12,7 @@ Se apri Claude Code dentro una cartella protetta, perché ci vuoi lavorare appos
 
 ## Cosa serve
 
-Claude Code 2.1.287 o successivo, nel terminale, in VS Code o nella scheda Code dell'app desktop. Per sapere che versione hai scrivi `claude --version` nel terminale, per aggiornarla `claude update`. Con una versione più vecchia la mod non parte, e non te lo dice.
+Claude Code 2.1.292 o successivo, nel terminale, in VS Code o nella scheda Code dell'app desktop. Per sapere che versione hai scrivi `claude --version` nel terminale, per aggiornarla `claude update`. Con una versione più vecchia la mod non parte, e non te lo dice.
 
 È provata su Mac. Su Linux dovrebbe comportarsi allo stesso modo, su Windows non è stata provata.
 
@@ -26,7 +26,12 @@ Claude Code 2.1.287 o successivo, nel terminale, in VS Code o nella scheda Code 
 /plugin install cartelle-protette --marketplace Iggy56/cartelle-protette
 ```
 
-Rispondi `y` per aggiungere il catalogo, scegli l'ambito «user» perché valga in tutti i progetti, e rispondi alle due domande.
+Rispondi `y` per aggiungere il catalogo, scegli l'ambito «user» perché valga in tutti i progetti, e rispondi alle due domande. Se il comando non riconosce `--marketplace`, fallo in due passi:
+
+```
+/plugin marketplace add Iggy56/cartelle-protette
+/plugin install cartelle-protette@cartelle-protette
+```
 
 Le domande sono queste:
 
@@ -54,7 +59,7 @@ La mod vive dentro Claude Code e ferma quello che fa Claude Code, compresi i suo
 - le altre app: se apri un file in Word e lo salvi, o se Dropbox sincronizza, la mod non c'entra;
 - Claude usato da altre app, come la chat di Claude Desktop con l'accesso ai file o Cowork;
 - un programma che scrive nella cartella per conto suo, senza che il comando la nomini;
-- le versioni di Claude Code precedenti alla 2.1.287.
+- le versioni di Claude Code precedenti alla 2.1.292.
 
 Riduce il rischio, non lo azzera. Una cartella che nessuno deve mai cambiare, come un archivio, puoi bloccarla anche dal Mac: nel Finder, tasto destro sulla cartella, «Ottieni informazioni», e in «Condivisione e permessi» metti «Sola lettura», poi «Applica agli elementi inclusi» dal menu con l'ingranaggio. Così si ferma qualsiasi app, tu compreso, e la mod impedisce a Claude di togliere il blocco.
 
