@@ -107,6 +107,13 @@ test('un programma che nomina la cartella si ferma prima di partire', async () =
   expect(await come('python3 conti.py', { leggi })).toBe('passa')
 })
 
+test('un pezzo che comincia con un percorso non è un programma, se non lo sembra', async () => {
+  // Una nota che nomina la cartella, scritta in testa a un elenco o a una riga di testo: non si lancia.
+  const leggi = async (p: string) => (p === `${CASA}/Progetti/sito/nota.md` ? 'vedi ~/Contratti' : undefined)
+  expect(await come('F=(sito/nota.md altro.md); echo fatto', { leggi })).toBe('passa')
+  expect(await come("cat <<'FINE'\nsito/nota.md è la nota\nFINE", { leggi })).toBe('passa')
+})
+
 test('le impostazioni di Claude Code non si scrivono dal terminale', async () => {
   expect(await come("echo '{}' > ~/.claude/settings.json")).toBe('impostazioni')
   expect(await come('sed -i "" s/true/false/ .claude/settings.local.json')).toBe('impostazioni')

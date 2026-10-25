@@ -1,6 +1,6 @@
 {
   "name": "cartelle-protette",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cartelle che Claude può leggere ma non modificare: niente modifiche ai file, niente comandi che ci scrivono, né dal terminale né dai connettori.",
   "author": { "name": "Damiano Ravanelli" },
   "license": "MIT",
@@ -12,7 +12,7 @@
       "type": "string",
       "multiple": true,
       "title": "Cartelle protette",
-      "description": "Le cartelle dove Claude può leggere ma non scrivere, una per riga. Per esempio ~/Documenti/Contratti.",
+      "description": "Le cartelle dove Claude può leggere ma non scrivere, separate da un punto e virgola. Per esempio ~/Documenti/Contratti; ~/Clienti",
       "default": []
     },
     "lavorare_dentro": {

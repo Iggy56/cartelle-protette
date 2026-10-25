@@ -206,11 +206,12 @@ function suTutto(parole: readonly string[]): string[] {
   return tieneDestinazione ? percorsi.slice(0, -1) : percorsi
 }
 
-// Il file che il pezzo esegue: python3 x.py, bash x.sh, ./x.sh.
+// Il file che il pezzo esegue: python3 x.py, bash x.sh, ./x.sh. Un pezzo che comincia con un
+// percorso qualsiasi (una riga di testo, un elenco fra parentesi) non è un programma.
 function programmaDi(parole: readonly string[]): string | undefined {
   const [primo = '', ...resto] = parole
   if (INTERPRETI.has(primo)) return resto.find(w => !w.startsWith('-'))
-  return primo.includes('/') || PROGRAMMA.test(primo) ? primo : undefined
+  return /^(?:\.{1,2}\/|\/|~\/)/.test(primo) && PROGRAMMA.test(primo) ? primo : undefined
 }
 
 /** Il primo modo in cui il comando tocca una cartella protetta, o le impostazioni della guardia. */

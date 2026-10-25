@@ -35,7 +35,7 @@ Rispondi `y` per aggiungere il catalogo, scegli l'ambito «user» perché valga 
 
 Le domande sono queste:
 
-- **Cartelle protette**, una per riga, per esempio `~/Documenti/Contratti`.
+- **Cartelle protette**, separate da un punto e virgola, per esempio `~/Documenti/Contratti; ~/Clienti`. Il modulo di VS Code non va a capo, quindi si scrivono tutte sulla stessa riga.
 - **Lavorare dentro la cartella**: sì (la risposta di partenza) se vuoi che la guardia si faccia da parte quando apri Claude Code dentro una cartella protetta, no se deve restare accesa anche lì.
 
 Se installi con `claude plugin install` dal terminale normale le domande non compaiono. Le compili dopo, dentro una sessione, con `/plugin configure cartelle-protette@cartelle-protette`.
